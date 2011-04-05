@@ -50,4 +50,9 @@ setup(
     extras_require={
         'test': tests_require
         },
-)
+    entry_points="""
+    # -*- Entry points: -*-
+    [chameleon.tales]
+    slot = dolmen.tales.slot:SlotExpr
+    """,
+    )
