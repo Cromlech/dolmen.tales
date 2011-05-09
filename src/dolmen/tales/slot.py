@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import ast
-from chameleon.tales import TalesExpr
 from zope.component import getMultiAdapter
 from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template

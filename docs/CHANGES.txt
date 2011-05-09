@@ -1,8 +1,0 @@
-Changes
-=======
-
-0.1 (unreleased)
-----------------
-
-- Fork from `megrok.chameleon 0.5.2trunk`
-- ...
