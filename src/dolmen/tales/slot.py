@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import ast
+from zope.schema import Dict
+from zope.interface import Interface
 from zope.component import getMultiAdapter
 from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template
 from chameleon.astutil import Symbol
+
+
+class IComposedView(Interface):
+
+    shards = Dict(
+        title=u'Slots used to render content',
+        required=True)
 
 
 def query_slot(econtext, name):
@@ -13,8 +22,11 @@ def query_slot(econtext, name):
     context = econtext['context']
     request = econtext['request']
     view = econtext['view']
-    slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
-    slot.update()
+    if IComposedView.providedBy(view):
+        slot = view.shards.get(name)
+    else:
+        slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
+        slot.update()
     return slot.render()
 
 
