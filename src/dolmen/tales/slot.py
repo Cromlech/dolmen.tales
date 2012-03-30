@@ -6,6 +6,22 @@ from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template
 from chameleon.astutil import Symbol
 
+try:
+    import zope.security
+
+    def resolve_slot(slot):
+        if (zope.security.canAccess(component, 'update') and
+            zope.security.canAccess(component, 'render')):
+            slot.update()
+            return slot.render()
+        else:
+            return u''
+
+except ImportError:
+    def resolve_slot(slot):
+        slot.update()
+        return slot.render()
+
 
 def query_slot(econtext, name):
     """Compute the result of a slot expression
@@ -14,8 +30,7 @@ def query_slot(econtext, name):
     request = econtext['request']
     view = econtext['view']
     slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
-    slot.update()
-    return slot.render()
+    return resolve_slot(slot)
 
 
 class SlotExpr(object):
