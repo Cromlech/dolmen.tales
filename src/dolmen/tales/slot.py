@@ -10,8 +10,8 @@ try:
     import zope.security
 
     def resolve_slot(slot):
-        if (zope.security.canAccess(component, 'update') and
-            zope.security.canAccess(component, 'render')):
+        if (zope.security.canAccess(slot, 'update') and
+            zope.security.canAccess(slot, 'render')):
             slot.update()
             return slot.render()
         else:
