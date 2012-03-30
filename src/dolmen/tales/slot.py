@@ -16,6 +16,23 @@ class IComposedView(Interface):
         required=True)
 
 
+try:
+    import zope.security
+
+    def resolve_slot(slot):
+        if (zope.security.canAccess(slot, 'update') and
+            zope.security.canAccess(slot, 'render')):
+            slot.update()
+            return slot.render()
+        else:
+            return u''
+
+except ImportError:
+    def resolve_slot(slot):
+        slot.update()
+        return slot.render()
+
+
 def query_slot(econtext, name):
     """Compute the result of a slot expression
     """
@@ -26,8 +43,7 @@ def query_slot(econtext, name):
         slot = view.shards.get(name)
     else:
         slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
-        slot.update()
-    return slot.render()
+    return resolve_slot(slot)
 
 
 class SlotExpr(object):
