@@ -1,7 +1,19 @@
 CHANGES
 =======
 
+0.1 (2012-04-15)
+----------------
+
+* The slot rendering is now secured. If `zope.security` is present,
+  the TALES will check the permission, to allow or not the slot rendering.
+  Please not that this change only if you use secured slot. If not, the
+  change will be effectless.
+* `dolmen.tales.slot` now respects the `ISlot` interface  and will no
+  long call `__call__` but will now use successively `update` and `render`
+  as it normally should.
+
+
 0.1a1 (2011-05-09)
 ------------------
 
-- Initial release
+* Initial release

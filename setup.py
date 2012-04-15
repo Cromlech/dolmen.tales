@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = "0.1a1"
+version = "0.1"
 
 install_requires = [
     'Chameleon >= 2.0rc7',
