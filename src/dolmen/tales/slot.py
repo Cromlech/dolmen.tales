@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import ast
-from zope.component import getMultiAdapter
+from zope.component import queryMultiAdapter
 from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template
 from chameleon.astutil import Symbol
@@ -39,8 +39,10 @@ def query_slot(econtext, name):
     context = econtext.get('context')
     request = econtext.get('request')
     view = econtext.get('view')
-    slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
-    return resolve_slot(slot)
+    slot = queryMultiAdapter((context, request, view), IViewSlot, name=name)
+    if slot is not None:
+        return resolve_slot(slot)
+    return u""
 
 
 class SlotExpr(object):
