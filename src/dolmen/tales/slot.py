@@ -6,29 +6,39 @@ from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template
 from chameleon.astutil import Symbol
 
+
+def render_slot(slot):
+    slot.update()
+    return slot.render()
+
+
 try:
-    import zope.security
+    # We might has zope.security
+    from zope.security._proxy import _Proxy as Proxy
 
     def resolve_slot(slot):
-        if (zope.security.canAccess(slot, 'update') and
-            zope.security.canAccess(slot, 'render')):
-            slot.update()
-            return slot.render()
+        """If slot is a Proxy, we need to check the security.
+        If not, we render it.
+        """
+        if type(slot) is Proxy:
+            if (zope.security.canAccess(slot, 'update') and
+                zope.security.canAccess(slot, 'render')):
+                return render_slot(slot)
+            else:
+                return u''
         else:
-            return u''
+            return render_slot(slot)
 
 except ImportError:
-    def resolve_slot(slot):
-        slot.update()
-        return slot.render()
+    resolve_slot = render_slot
 
 
 def query_slot(econtext, name):
     """Compute the result of a slot expression
     """
-    context = econtext['context']
-    request = econtext['request']
-    view = econtext['view']
+    context = econtext.get('context')
+    request = econtext.get('request')
+    view = econtext.get('view')
     slot = getMultiAdapter((context, request, view), IViewSlot, name=name)
     return resolve_slot(slot)
 
