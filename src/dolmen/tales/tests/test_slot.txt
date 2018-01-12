@@ -1,0 +1,56 @@
+Tales expressions
+=================
+
+Define a slot
+-------------
+
+  >>> from dolmen.tales import SlotExpr
+  >>> from cromlech.browser.interfaces import IViewSlot
+  >>> from zope.interface import Interface
+
+  >>> class Slot():
+  ...    def __init__(self, context, request, view):
+  ...        pass
+  ...
+  ...    def update(self): pass
+  ...
+  ...    def render(self):
+  ...        return u"My nice slot"
+
+  >>> from crom import implicit
+  >>> implicit.registry.register(
+  ...     (Interface, Interface, Interface), IViewSlot, 'test', Slot)
+
+
+Implementing a renderer to query the slot
+-----------------------------------------
+
+  >>> from chameleon.zpt import template
+  >>> class View(object):
+  ...
+  ...     template = template.PageTemplate(
+  ...          "My slot here: <tal:slot content='slot:test' />",
+  ...          expression_types = {'slot': SlotExpr}
+  ...     )
+  ...
+  ...     def __init__(self, context, request):
+  ...         self.context = context
+  ...         self.request = request
+  ...
+  ...     def render(self):
+  ...         namespace = {
+  ...             'view': self,
+  ...             'request': self.request,
+  ...             'context': self.context,
+  ...             }
+  ...         return self.template.render(self, **namespace)
+
+
+Rendering
+---------
+
+  >>> context = object()
+  >>> request = object()
+  >>> view = View(context, request)
+  >>> view.render()
+  'My slot here: My nice slot'

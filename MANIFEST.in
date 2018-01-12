@@ -1,2 +1,2 @@
-recursive-include src/dolmen/tales *.py *.txt
+recursive-include src/dolmen/tales *.py
 recursive-include docs *.txt

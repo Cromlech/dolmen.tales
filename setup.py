@@ -3,19 +3,18 @@
 import os
 from setuptools import setup, find_packages
 
-version = "0.1"
+version = "1.0+crom"
 
 install_requires = [
+    'crom',
     'Chameleon >= 2.4',
     'cromlech.browser >= 0.5',
     'setuptools',
-    'zope.component',
     ]
 
 tests_require = [
+    'pytest',
     'cromlech.browser [test]',
-    'dolmen.template >= 0.2',
-    'zope.component',
     'zope.interface',
     ]
 

@@ -1,36 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import ast
-from zope.component import queryMultiAdapter
+from crom import ComponentLookupError
 from cromlech.browser.interfaces import IViewSlot
 from chameleon.codegen import template
 from chameleon.astutil import Symbol
 
-
-def render_slot(slot):
-    slot.update()
-    return slot.render()
-
-
 try:
-    # We might has zope.security
-    from zope.security._proxy import _Proxy as Proxy
-
-    def resolve_slot(slot):
-        """If slot is a Proxy, we need to check the security.
-        If not, we render it.
-        """
-        if type(slot) is Proxy:
-            if (zope.security.canAccess(slot, 'update') and
-                zope.security.canAccess(slot, 'render')):
-                return render_slot(slot)
-            else:
-                return u''
-        else:
-            return render_slot(slot)
+    from cromlech.security import getSecurityGuards
 
 except ImportError:
-    resolve_slot = render_slot
+
+    def getSecurityGuards():
+        return None, None
 
 
 def query_slot(econtext, name):
@@ -39,11 +21,26 @@ def query_slot(econtext, name):
     context = econtext.get('context')
     request = econtext.get('request')
     view = econtext.get('view')
-    slot = queryMultiAdapter((context, request, view), IViewSlot, name=name)
-    if slot is not None:
-        return resolve_slot(slot)
-    return u""
+    security_predict, security_check = getSecurityGuards()
+    try:
+        factory = IViewSlot.component(context, request, view, name=name)
+        if security_predict is not None:
+            factory = security_predict(factory, swallow_errors=True)
+            if factory is None:
+                return ''  # Security predicates failed.
 
+        slot = factory(context, request, view)
+        if security_check is not None:
+            slot = security_check(slot)
+            if slot is None:
+                return ''  # Security checks failed.
+
+    except ComponentLookupError:
+        raise
+    else:
+        slot.update()
+        return slot.render()
+    
 
 class SlotExpr(object):
     """
